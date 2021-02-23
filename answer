@@ -1,0 +1,27 @@
+1A) Please provide a shell-script to Housekeeping log in /var/log/nginx/ if log more than 7 days
+1B) Please provide a logrotate script in /etc/logrotate.d/ to compress log in /var/log/nginx/ if more than 100MB
+Answer :
+1 A)
+
+#!/bin/bash
+ambil=$(date +%d)
+let "b = ambil - 9"
+echo "Ambil Tanggal : $b | 9 hari yang lalu"
+bulan=$(date '+%B' | grep -oP "..." | sed -n 1p)
+run=$(ls -lah | grep -a "$bulan $b")
+echo "list : "
+echo "$run"
+
+1B)
+/var/log/nginx/access_log {
+    rotate 7
+    size 500k
+    dateext
+    dateformat -%Y-%m-%d
+    missingok
+    compress
+    sharedscripts
+    postrotate
+        test -r /var/run/nginx.pid && kill -USR1 `cat /var/run/nginx.pid`
+    endscript
+}
